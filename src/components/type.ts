@@ -1,13 +1,13 @@
 export interface EnergyPoint {
   id: number;
-  time: string; 
-  level: number; 
+  time: string;
+  level: number;
 }
 
 export interface EnergyHighlight {
-  time: string; 
+  time: string;
   label: string;
-  color: string; 
+  color: string;
 }
 
 export interface TimelineMessage {
@@ -15,3 +15,9 @@ export interface TimelineMessage {
   description: string;
 }
 
+export type EnergyTimelineProps = {
+  data: EnergyPoint[];
+  highlights: EnergyHighlight[];
+  currentTime: string;
+  message: TimelineMessage;
+};

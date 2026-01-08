@@ -1,9 +1,9 @@
+import { EnergyTimeline } from './components/EnergyTimeline/EnergyTimeline'
+
 function App() {
   return (
-    <div className="min-h-screen bg-red-500">
-      <div className="">
-        <h1 className="text-3xl font-bold text-gray-900">Energy Timeline</h1>
-      </div>
+    <div className="min-h-screen bg-black flex items-center justify-center ">
+      <EnergyTimeline />
     </div>
   )
 }
