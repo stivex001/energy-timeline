@@ -57,7 +57,7 @@ export const EnergyChart = (props: EnergyChartProps) => {
         onMouseLeave={handleMouseLeave}
       >
         {/* Background segments */}
-        <g opacity={0.1}>
+        <g>
           {backgroundSegments.map((segment, idx) => (
             <rect
               key={idx}
@@ -65,7 +65,7 @@ export const EnergyChart = (props: EnergyChartProps) => {
               y={MARGIN.top}
               width={segment.x2 - segment.x1}
               height={CHART_HEIGHT - MARGIN.top - MARGIN.bottom}
-              fill="#ffffff"
+              fill={segment.color}
             />
           ))}
         </g>
@@ -153,20 +153,6 @@ export const EnergyChart = (props: EnergyChartProps) => {
             />
           </g>
         )}
-
-        {/* Highlights markers */}
-        {/* {highlightsWithPositions.map((highlight, idx) => (
-          <g key={idx} className="highlight-marker">
-            <circle
-              cx={highlight.x}
-              cy={highlight.y}
-              r={4}
-              fill={highlight.color}
-              stroke="#0b0f1a"
-              strokeWidth={2}
-            />
-          </g>
-        ))} */}
       </svg>
 
       <HighlightsLabels

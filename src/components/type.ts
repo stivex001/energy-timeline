@@ -50,6 +50,7 @@ export type BackgroundSegment = {
   x1: number
   x2: number
   label: string
+  color: string
 }
 
 export type HighlightWithPosition = EnergyHighlight & {
