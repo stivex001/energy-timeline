@@ -1,17 +1,13 @@
 import { useMemo } from "react";
 
 import { getFocusState } from "./utils";
-import { EnergyChart } from "./EnergyChart";
-import {
-  energyData,
-  highlights,
-  currentTime,
-  customMessage,
-} from "../../data/sampleData";
+import { energyData, highlights, currentTime } from "../../data/sampleData";
+import { EnergyChartNew } from "./EnergyChartNew";
+import { RecommendationText } from "./RecommendationText";
+import { SleepInfoCards } from "./SleepInfoCards";
 
 export const EnergyTimeline = () => {
   const data = energyData;
-  const message = customMessage;
 
   const parsedData = useMemo(() => {
     return data.map((d) => ({
@@ -70,13 +66,14 @@ export const EnergyTimeline = () => {
   }, [parsedData, currentTimeDate]);
 
   return (
-    <div className="w-full max-w-5xl rounded-xl p-6 bg-linear-to-b from-[#101929] to-[#08090d]">
+    <div className="w-full max-w-5xl rounded-xl p-6 bg-gradient-to-b from-[#101929] to-[#08090d]">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg text-white font-semibold">Energy Insights</h2>
         <div className="flex items-center gap-4">
-          <button className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-            Add activity
+          <button className="text-sm text-white hover:text-blue-300 transition-colors flex items-center gap-2">
+            <span>🏃</span>
+            <span>Add activity</span>
           </button>
           <button className="text-sm text-[#788089] hover:text-white cursor-pointer transition-colors">
             ✕
@@ -84,22 +81,17 @@ export const EnergyTimeline = () => {
         </div>
       </div>
 
-      {/* Insight text with badge */}
+      {/* Today's Energy Rhythm Section */}
       <div className="mb-6">
-        <div className="flex items-center justify-between gap-3 mb-2">
-          <div className="space-y-2">
-            <h3 className="text-sm text-gray-500 font-medium">
-              Today's Energy Rhythm
-            </h3>
-            <div>
-              <p className="text-base text-white">{message.title}</p>
-              <p className="text-base text-white">
-                {message.description}
-              </p>
-            </div>
-          </div>
+        <h3 className="text-sm text-gray-400 font-medium mb-3">
+          Today's Energy Rhythm
+        </h3>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <p className="text-base text-white font-medium">
+            Your energy level is high right now.
+          </p>
           {currentPhase && (
-            <span className="px-2.5 py-2 text-xs font-medium rounded-full bg-[#12274e] text-[#6285c3] border border-blue-500/30 flex items-center gap-1.5">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center gap-1.5 whitespace-nowrap">
               <span>⛰</span>
               <span>
                 {currentPhase.label} • {getFocusState(currentEnergyLevel)}
@@ -109,11 +101,17 @@ export const EnergyTimeline = () => {
         </div>
       </div>
 
-      <EnergyChart
-        data={data}
-        highlights={highlights}
-        currentTime={currentTime}
-      />
+      {/* Chart */}
+      <div className="mb-6">
+        <EnergyChartNew
+          data={data}
+          highlights={highlights}
+          currentTime={currentTime}
+        />
+      </div>
+
+      <RecommendationText />
+      <SleepInfoCards />
     </div>
   );
 };

@@ -1,0 +1,45 @@
+import type { HighlightWithPosition } from "../type";
+
+type HighlightsLabelsProps = {
+  highlights: HighlightWithPosition[];
+  chartHeight: number;
+  margin: { top: number; right: number; bottom: number; left: number };
+  highlightsOffset: number;
+};
+
+export const HighlightsLabels = ({
+  highlights,
+  chartHeight,
+  margin,
+  highlightsOffset,
+}: HighlightsLabelsProps) => {
+  return (
+    <div
+      className="absolute top-0 right-0 flex flex-col justify-start gap-1 pointer-events-none"
+      style={{
+        width: `${highlightsOffset + 120}px`,
+        height: `${chartHeight - margin.bottom - margin.top}px`,
+        marginTop: `${margin.top}px`,
+      }}
+    >
+      {highlights.map((highlight, idx) => (
+        <div
+          key={idx}
+          className="flex items-center gap-2 text-xs whitespace-nowrap"
+          style={{
+            position: "absolute",
+            top: `${highlight.y - margin.top - 6}px`,
+            left: "10px",
+          }}
+        >
+          <div
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: highlight.color }}
+          />
+          <span className="text-gray-400">{highlight.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
