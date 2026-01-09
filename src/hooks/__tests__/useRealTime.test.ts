@@ -55,7 +55,7 @@ describe('useRealTime', () => {
   it('should cleanup interval on unmount', () => {
     const { unmount } = renderHook(() => useRealTime(1000))
 
-    const clearIntervalSpy = vi.spyOn(global, 'clearInterval')
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
 
     unmount()
 
