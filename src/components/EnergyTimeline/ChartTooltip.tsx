@@ -1,5 +1,6 @@
 import type { HoveredPoint, HighlightWithPosition } from "../type";
-import { getEnergyColor, getFocusState } from "./utils";
+import { getEnergyColor } from "../../utils/energyColor";
+import { getFocusState } from "../../utils/focusState";
 
 type ChartTooltipProps = {
   hoveredPoint: HoveredPoint;

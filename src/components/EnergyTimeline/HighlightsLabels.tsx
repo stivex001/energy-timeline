@@ -25,13 +25,7 @@ export const HighlightsLabels = ({
       {highlights.map((highlight, idx) => (
         <div
           key={idx}
-          className="flex items-center gap-2 text-xs whitespace-nowrap"
-          style={{
-            position: "absolute",
-            top: `${highlight.y - margin.top - 8}px`,
-            left: "8px",
-            transform: "translateY(-50%)",
-          }}
+          className="flex items-center gap-2 text-xs whitespace-nowrap mb-2"
         >
           <div
             className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -45,4 +39,3 @@ export const HighlightsLabels = ({
     </div>
   );
 };
-

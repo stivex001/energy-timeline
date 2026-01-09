@@ -1,265 +1,203 @@
-import { useMemo, useState } from "react";
-import * as d3 from "d3";
-
 import type { EnergyPoint, EnergyHighlight } from "../type";
-import { getEnergyColor } from "./utils";
 
-const CHART_WIDTH = 800;
-const CHART_HEIGHT = 250;
-const MARGIN = { top: 40, right: 200, bottom: 50, left: 60 };
-const HIGHLIGHTS_OFFSET = 20;
+import { useParsedData } from "../../hooks/useParsedData";
+import { useChartScales } from "../../hooks/useChartScales";
+import { useChartSegments } from "../../hooks/useChartSegments";
+import { useTimeLabels } from "../../hooks/useTimeLabels";
+import { useHighlights } from "../../hooks/useHighlights";
+import { useCurrentTimePosition } from "../../hooks/useCurrentTimePosition";
+import { useBackgroundSegments } from "../../hooks/useBackgroundSegments";
+import { useHover } from "../../hooks/useHover";
+import {
+  CHART_WIDTH,
+  CHART_HEIGHT,
+  MARGIN,
+  HIGHLIGHTS_OFFSET,
+} from "../../hooks/constants";
+import { HighlightsLabels } from "./HighlightsLabels";
+import { ChartTooltip } from "./ChartTooltip";
+import { useRealTime } from "../../hooks/useRealTime";
 
 export type EnergyChartProps = {
   data: EnergyPoint[];
   highlights: EnergyHighlight[];
-  currentTime: string;
+  currentTime?: string; // Optional, will use real-time if not provided
 };
 
-type HoveredPoint = {
-  svgX: number;
-  svgY: number;
-  screenX: number;
-  screenY: number;
-  level: number;
-  time: Date;
-};
+export const EnergyChart = (props: EnergyChartProps) => {
+  const { data, highlights } = props;
 
-export const EnergyChart = ({
-  data,
-  highlights,
-  currentTime,
-}: EnergyChartProps) => {
-  const [hoveredPoint, setHoveredPoint] =
-    useState<HoveredPoint | null>(null);
+  // Get real-time current time that updates every minute
+  const realTime = useRealTime(60000); // Update every 60 seconds
 
-  const parsedData = useMemo(
-    () =>
-      data.map((d) => ({
-        ...d,
-        date: new Date(d.time),
-      })),
-    [data]
+  const parsedData = useParsedData(data);
+
+  // Get scales
+  const { xScale, yScale } = useChartScales(parsedData);
+
+  // Get chart elements
+  const segments = useChartSegments(parsedData, xScale, yScale);
+  const timeLabels = useTimeLabels(parsedData, xScale);
+  const highlightsWithPositions = useHighlights(
+    highlights,
+    parsedData,
+    xScale,
+    yScale
   );
+  // Use real-time instead of the static currentTime prop
+  const currentTimePosition = useCurrentTimePosition(
+    realTime,
+    parsedData,
+    xScale,
+    yScale
+  );
+  const backgroundSegments = useBackgroundSegments(parsedData, xScale);
 
-  const xScale = useMemo(() => {
-    return d3
-      .scaleTime()
-      .domain(d3.extent(parsedData, (d) => d.date) as [Date, Date])
-      .range([
-        MARGIN.left,
-        CHART_WIDTH - MARGIN.right - HIGHLIGHTS_OFFSET,
-      ]);
-  }, [parsedData]);
-
-  const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
-      .domain([0, 1])
-      .range([CHART_HEIGHT - MARGIN.bottom, MARGIN.top]);
-  }, []);
-
-  const lineGenerator = useMemo(() => {
-    return d3
-      .line<(typeof parsedData)[number]>()
-      .x((d) => xScale(d.date))
-      .y((d) => yScale(d.level))
-      .curve(d3.curveCatmullRom);
-  }, [xScale, yScale]);
-
-  const currentDate = useMemo(() => new Date(currentTime), [currentTime]);
-
-  const currentPoint = useMemo(() => {
-    return parsedData.reduce((closest, point) => {
-      const diff = Math.abs(point.date.getTime() - currentDate.getTime());
-      const closestDiff = Math.abs(
-        closest.date.getTime() - currentDate.getTime()
-      );
-      return diff < closestDiff ? point : closest;
-    }, parsedData[0]);
-  }, [parsedData, currentDate]);
-
-  const currentX = xScale(currentDate);
-  const currentY = yScale(currentPoint.level);
-
-  const timeTicks = useMemo(() => {
-    const start = d3.timeHour.floor(parsedData[0].date);
-    const end = parsedData[parsedData.length - 1].date;
-    return d3.timeHour.every(4)?.range(start, end) ?? [];
-  }, [parsedData]);
-
-  const formatTime = d3.timeFormat("%-I %p");
-
-  const daySegments = [
-    { label: "Night", start: 0, end: 6 },
-    { label: "Morning", start: 6, end: 12 },
-    { label: "Afternoon", start: 12, end: 18 },
-    { label: "Evening", start: 18, end: 24 },
-  ];
-
-  const baseDate = useMemo(() => {
-    const d = new Date(parsedData[0].date);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, [parsedData]);
-
-  const hourToDate = (hour: number) => {
-    const d = new Date(baseDate);
-    d.setHours(hour);
-    return d;
-  };
-
-  const drawableHeight = CHART_HEIGHT - MARGIN.top - MARGIN.bottom;
-
-  const coloredSegments = useMemo(() => {
-    const segments: (typeof parsedData)[] = [];
-    let currentSegment: typeof parsedData = [];
-
-    parsedData.forEach((point, index) => {
-      if (currentSegment.length === 0) {
-        currentSegment.push(point);
-        return;
-      }
-
-      const prev = currentSegment[currentSegment.length - 1];
-
-      if (getEnergyColor(prev.level) === getEnergyColor(point.level)) {
-        currentSegment.push(point);
-      } else {
-        segments.push(currentSegment);
-        currentSegment = [prev, point];
-      }
-
-      if (index === parsedData.length - 1) {
-        segments.push(currentSegment);
-      }
-    });
-
-    return segments;
-  }, [parsedData]);
+  const {
+    hoveredPoint,
+    svgRef,
+    containerRef,
+    handleMouseMove,
+    handleMouseLeave,
+  } = useHover(parsedData, xScale, yScale);
 
   return (
-    <div className="relative">
-      <svg width={CHART_WIDTH} height={CHART_HEIGHT} className="w-full h-auto">
+    <div ref={containerRef} className="relative w-full h-full overflow-x-auto">
+      <svg
+        ref={svgRef}
+        width={CHART_WIDTH}
+        height={CHART_HEIGHT}
+        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full h-auto"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         {/* Background segments */}
-        {daySegments.map((segment, index) => {
-          const xStart = xScale(hourToDate(segment.start));
-          const xEnd = xScale(hourToDate(segment.end));
-
-          return (
+        <g opacity={0.1}>
+          {backgroundSegments.map((segment, idx) => (
             <rect
-              key={index}
-              x={xStart}
+              key={idx}
+              x={segment.x1}
               y={MARGIN.top}
-              width={xEnd - xStart}
-              height={drawableHeight}
-              className="fill-white/5"
+              width={segment.x2 - segment.x1}
+              height={CHART_HEIGHT - MARGIN.top - MARGIN.bottom}
+              fill="#ffffff"
             />
-          );
-        })}
-
-        {/* Energy curve */}
-        {coloredSegments.map((segment, index) => {
-          const d = lineGenerator(segment);
-          if (!d) return null;
-
-          return (
-            <path
-              key={index}
-              d={d}
-              fill="none"
-              stroke={getEnergyColor(segment[0].level)}
-              strokeWidth={3}
-            />
-          );
-        })}
-
-        {/* Current time line */}
-        <line
-          x1={currentX}
-          x2={currentX}
-          y1={MARGIN.top}
-          y2={CHART_HEIGHT - MARGIN.bottom}
-          stroke="white"
-          strokeWidth={1}
-          strokeDasharray="4 4"
-        />
-
-        {/* Current point */}
-        <circle cx={currentX} cy={currentY} r={5} fill="white" />
-
-        {/* Hover point */}
-        {hoveredPoint && (
-          <circle
-            cx={hoveredPoint.svgX}
-            cy={hoveredPoint.svgY}
-            r={5}
-            fill="white"
-            pointerEvents="none"
-          />
-        )}
+          ))}
+        </g>
 
         {/* Time labels */}
-        {timeTicks.map((time, index) => (
-          <text
-            key={index}
-            x={xScale(time)}
-            y={CHART_HEIGHT}
-            textAnchor="middle"
-            className="fill-gray-400 text-xs"
-          >
-            {formatTime(time)}
-          </text>
+        <g className="time-labels">
+          {timeLabels.map((label, idx) => (
+            <g key={idx}>
+              <line
+                x1={label.x}
+                y1={CHART_HEIGHT - MARGIN.bottom}
+                x2={label.x}
+                y2={CHART_HEIGHT - MARGIN.bottom + 5}
+                stroke="#666"
+                strokeWidth={1}
+              />
+              <text
+                x={label.x}
+                y={CHART_HEIGHT - MARGIN.bottom + 20}
+                fill="#888"
+                fontSize="11"
+                textAnchor="middle"
+                className="font-mono"
+              >
+                {label.label}
+              </text>
+            </g>
+          ))}
+        </g>
+
+        {/* Energy curve segments */}
+        {segments.map((segment, idx) => (
+          <path
+            key={idx}
+            d={segment.path}
+            fill="none"
+            stroke={segment.color}
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         ))}
 
-        {/* Interaction layer (MUST BE LAST) */}
-        <rect
-          x={MARGIN.left}
-          y={MARGIN.top}
-          width={
-            CHART_WIDTH - MARGIN.left - MARGIN.right - HIGHLIGHTS_OFFSET
-          }
-          height={drawableHeight}
-          fill="transparent"
-          onMouseMove={(e) => {
-            const bounds = e.currentTarget.getBoundingClientRect();
-            const mouseX = e.clientX - bounds.left;
+        {/* Current time indicator */}
+        <g className="current-time-indicator">
+          <line
+            x1={currentTimePosition.x}
+            y1={MARGIN.top}
+            x2={currentTimePosition.x}
+            y2={CHART_HEIGHT - MARGIN.bottom}
+            stroke="white"
+            strokeWidth={0.3}
+            strokeDasharray="2,2"
+            opacity={0.5}
+          />
+          <circle
+            cx={currentTimePosition.x}
+            cy={currentTimePosition.y}
+            r={4}
+            fill="white"
+            stroke="#0b0f1a"
+            strokeWidth={2}
+          />
+        </g>
 
-            const hoveredDate = xScale.invert(mouseX);
+        {/* Hover indicator */}
+        {hoveredPoint && (
+          <g className="hover-indicator">
+            <circle
+              cx={hoveredPoint.svgX}
+              cy={hoveredPoint.svgY}
+              r={4}
+              fill="white"
+              stroke="#0b0f1a"
+              strokeWidth={2}
+            />
+            <line
+              x1={hoveredPoint.svgX}
+              y1={MARGIN.top}
+              x2={hoveredPoint.svgX}
+              y2={CHART_HEIGHT - MARGIN.bottom}
+              stroke="rgba(255, 255, 255, 0.3)"
+              strokeWidth={1}
+              strokeDasharray="2,2"
+            />
+          </g>
+        )}
 
-            const closest = parsedData.reduce((a, b) =>
-              Math.abs(b.date.getTime() - hoveredDate.getTime()) <
-              Math.abs(a.date.getTime() - hoveredDate.getTime())
-                ? b
-                : a
-            );
-
-            setHoveredPoint({
-              svgX: xScale(closest.date),
-              svgY: yScale(closest.level),
-              screenX: e.clientX,
-              screenY: e.clientY,
-              level: closest.level,
-              time: closest.date,
-            });
-          }}
-          onMouseLeave={() => setHoveredPoint(null)}
-        />
+        {/* Highlights markers */}
+        {/* {highlightsWithPositions.map((highlight, idx) => (
+          <g key={idx} className="highlight-marker">
+            <circle
+              cx={highlight.x}
+              cy={highlight.y}
+              r={4}
+              fill={highlight.color}
+              stroke="#0b0f1a"
+              strokeWidth={2}
+            />
+          </g>
+        ))} */}
       </svg>
 
-      {/* Tooltip */}
+      <HighlightsLabels
+        highlights={highlightsWithPositions}
+        chartHeight={CHART_HEIGHT}
+        margin={MARGIN}
+        highlightsOffset={HIGHLIGHTS_OFFSET}
+      />
+
       {hoveredPoint && (
-        <div
-          className="fixed z-50 rounded-md bg-black/80 px-3 py-2 text-xs text-white"
-          style={{
-            left: hoveredPoint.screenX + 12,
-            top: hoveredPoint.screenY + 12,
-          }}
-        >
-          <div className="font-medium">
-            {d3.timeFormat("%-I:%M %p")(hoveredPoint.time)}
-          </div>
-          <div>Energy: {hoveredPoint.level.toFixed(2)}</div>
-        </div>
+        <ChartTooltip
+          hoveredPoint={hoveredPoint}
+          highlights={highlightsWithPositions}
+        />
       )}
     </div>
   );
