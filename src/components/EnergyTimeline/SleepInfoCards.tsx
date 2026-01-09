@@ -3,9 +3,7 @@ export const SleepInfoCards = () => {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-[#0f1624] rounded-lg p-4 border border-gray-800">
-          <h4 className="text-sm text-white font-medium mb-3">
-            Last night's sleep
-          </h4>
+          <h4 className="text-sm text-white font-medium mb-3">Last night's sleep</h4>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-2xl font-bold text-white mb-1">8h 5m</p>
@@ -20,9 +18,7 @@ export const SleepInfoCards = () => {
 
         {/* Sleep recommendation card */}
         <div className="bg-[#0f1624] rounded-lg p-4 border border-gray-800">
-          <h4 className="text-sm text-white font-medium mb-3">
-            Your sleep recommendation
-          </h4>
+          <h4 className="text-sm text-white font-medium mb-3">Your sleep recommendation</h4>
           <p className="text-2xl font-bold text-white mb-2">23:15 - 06:15</p>
           <p className="text-xs text-gray-400">
             Try to get at least 6 hours of sleep each day to clear sleep debt.
@@ -30,5 +26,5 @@ export const SleepInfoCards = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

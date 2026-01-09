@@ -1,8 +1,8 @@
-import { useMemo } from "react";
-import * as d3 from "d3";
+import { useMemo } from 'react'
+import * as d3 from 'd3'
 
-import type { EnergyHighlight, ParsedDataPoint } from "../components/type";
-import { processHighlights } from "../utils/chartHighlights";
+import type { EnergyHighlight, ParsedDataPoint } from '../components/type'
+import { processHighlights } from '../utils/chartHighlights'
 
 export const useHighlights = (
   highlights: EnergyHighlight[],
@@ -13,6 +13,5 @@ export const useHighlights = (
   return useMemo(
     () => processHighlights(highlights, parsedData, xScale, yScale),
     [highlights, parsedData, xScale, yScale]
-  );
-};
-
+  )
+}

@@ -1,11 +1,11 @@
-import type { HighlightWithPosition } from "../type";
+import type { HighlightWithPosition } from '../type'
 
 type HighlightsLabelsProps = {
-  highlights: HighlightWithPosition[];
-  chartHeight: number;
-  margin: { top: number; right: number; bottom: number; left: number };
-  highlightsOffset: number;
-};
+  highlights: HighlightWithPosition[]
+  chartHeight: number
+  margin: { top: number; right: number; bottom: number; left: number }
+  highlightsOffset: number
+}
 
 export const HighlightsLabels = ({
   highlights,
@@ -23,19 +23,14 @@ export const HighlightsLabels = ({
       }}
     >
       {highlights.map((highlight, idx) => (
-        <div
-          key={idx}
-          className="flex items-center gap-2 text-xs whitespace-nowrap mb-2"
-        >
+        <div key={idx} className="flex items-center gap-2 text-xs whitespace-nowrap mb-2">
           <div
             className="w-2.5 h-2.5 rounded-full shrink-0"
             style={{ backgroundColor: highlight.color }}
           />
-          <span className="text-gray-300 text-xs leading-tight">
-            {highlight.label}
-          </span>
+          <span className="text-gray-300 text-xs leading-tight">{highlight.label}</span>
         </div>
       ))}
     </div>
-  );
-};
+  )
+}

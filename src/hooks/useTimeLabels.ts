@@ -1,10 +1,10 @@
-import { useMemo } from "react";
-import * as d3 from "d3";
+import { useMemo } from 'react'
+import * as d3 from 'd3'
 
-import type { ParsedDataPoint } from "../components/type";
+import type { ParsedDataPoint } from '../components/type'
 
-import { formatTimeLabel } from "../utils/timeFormatting";
-import { generateTimeLabels } from "../utils/chartTimeLabels";
+import { formatTimeLabel } from '../utils/timeFormatting'
+import { generateTimeLabels } from '../utils/chartTimeLabels'
 
 export const useTimeLabels = (
   parsedData: ParsedDataPoint[],
@@ -13,6 +13,5 @@ export const useTimeLabels = (
   return useMemo(
     () => generateTimeLabels(parsedData, xScale, formatTimeLabel),
     [parsedData, xScale]
-  );
-};
-
+  )
+}

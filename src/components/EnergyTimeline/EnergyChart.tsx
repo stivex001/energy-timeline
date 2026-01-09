@@ -1,65 +1,48 @@
-import type { EnergyPoint, EnergyHighlight } from "../type";
+import type { EnergyPoint, EnergyHighlight } from '../type'
 
-import { useParsedData } from "../../hooks/useParsedData";
-import { useChartScales } from "../../hooks/useChartScales";
-import { useChartSegments } from "../../hooks/useChartSegments";
-import { useTimeLabels } from "../../hooks/useTimeLabels";
-import { useHighlights } from "../../hooks/useHighlights";
-import { useCurrentTimePosition } from "../../hooks/useCurrentTimePosition";
-import { useBackgroundSegments } from "../../hooks/useBackgroundSegments";
-import { useHover } from "../../hooks/useHover";
-import {
-  CHART_WIDTH,
-  CHART_HEIGHT,
-  MARGIN,
-  HIGHLIGHTS_OFFSET,
-} from "../../hooks/constants";
-import { HighlightsLabels } from "./HighlightsLabels";
-import { ChartTooltip } from "./ChartTooltip";
-import { useRealTime } from "../../hooks/useRealTime";
+import { useParsedData } from '../../hooks/useParsedData'
+import { useChartScales } from '../../hooks/useChartScales'
+import { useChartSegments } from '../../hooks/useChartSegments'
+import { useTimeLabels } from '../../hooks/useTimeLabels'
+import { useHighlights } from '../../hooks/useHighlights'
+import { useCurrentTimePosition } from '../../hooks/useCurrentTimePosition'
+import { useBackgroundSegments } from '../../hooks/useBackgroundSegments'
+import { useHover } from '../../hooks/useHover'
+import { CHART_WIDTH, CHART_HEIGHT, MARGIN, HIGHLIGHTS_OFFSET } from '../../hooks/constants'
+import { HighlightsLabels } from './HighlightsLabels'
+import { ChartTooltip } from './ChartTooltip'
+import { useRealTime } from '../../hooks/useRealTime'
 
 export type EnergyChartProps = {
-  data: EnergyPoint[];
-  highlights: EnergyHighlight[];
-  currentTime?: string; // Optional, will use real-time if not provided
-};
+  data: EnergyPoint[]
+  highlights: EnergyHighlight[]
+  currentTime?: string // Optional, will use real-time if not provided
+}
 
 export const EnergyChart = (props: EnergyChartProps) => {
-  const { data, highlights } = props;
+  const { data, highlights } = props
 
   // Get real-time current time that updates every minute
-  const realTime = useRealTime(60000); // Update every 60 seconds
+  const realTime = useRealTime(60000) // Update every 60 seconds
 
-  const parsedData = useParsedData(data);
+  const parsedData = useParsedData(data)
 
   // Get scales
-  const { xScale, yScale } = useChartScales(parsedData);
+  const { xScale, yScale } = useChartScales(parsedData)
 
   // Get chart elements
-  const segments = useChartSegments(parsedData, xScale, yScale);
-  const timeLabels = useTimeLabels(parsedData, xScale);
-  const highlightsWithPositions = useHighlights(
-    highlights,
-    parsedData,
-    xScale,
-    yScale
-  );
+  const segments = useChartSegments(parsedData, xScale, yScale)
+  const timeLabels = useTimeLabels(parsedData, xScale)
+  const highlightsWithPositions = useHighlights(highlights, parsedData, xScale, yScale)
   // Use real-time instead of the static currentTime prop
-  const currentTimePosition = useCurrentTimePosition(
-    realTime,
+  const currentTimePosition = useCurrentTimePosition(realTime, parsedData, xScale, yScale)
+  const backgroundSegments = useBackgroundSegments(parsedData, xScale)
+
+  const { hoveredPoint, svgRef, containerRef, handleMouseMove, handleMouseLeave } = useHover(
     parsedData,
     xScale,
     yScale
-  );
-  const backgroundSegments = useBackgroundSegments(parsedData, xScale);
-
-  const {
-    hoveredPoint,
-    svgRef,
-    containerRef,
-    handleMouseMove,
-    handleMouseLeave,
-  } = useHover(parsedData, xScale, yScale);
+  )
 
   return (
     <div ref={containerRef} className="relative w-full h-full overflow-x-auto">
@@ -194,11 +177,8 @@ export const EnergyChart = (props: EnergyChartProps) => {
       />
 
       {hoveredPoint && (
-        <ChartTooltip
-          hoveredPoint={hoveredPoint}
-          highlights={highlightsWithPositions}
-        />
+        <ChartTooltip hoveredPoint={hoveredPoint} highlights={highlightsWithPositions} />
       )}
     </div>
-  );
-};
+  )
+}

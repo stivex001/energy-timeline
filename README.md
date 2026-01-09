@@ -1,27 +1,31 @@
-# Energy Timeline 
+# Energy Timeline
 
 A React-based energy timeline visualization component that displays a user's energy levels throughout a 24-hour period as a smooth, color-coded curve using D3.js and SVG.
 
 ## 🚀 How to Run the Project
 
 ### Prerequisites
+
 - Node.js (v18 or higher recommended)
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/stivex001/energy-timeline.git
 cd energy-timeline
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -40,6 +44,49 @@ npm run build
 npm run preview
 ```
 
+### Development Scripts
+
+```bash
+# Start development server
+npm run dev
+
+# Run ESLint (check for errors)
+npm run lint
+
+# Fix ESLint errors automatically
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+
+# Check code formatting
+npm run format:check
+
+# Run unit tests (Vitest)
+npm test
+
+# Run unit tests in watch mode
+npm run test:watch
+
+# Run unit tests with UI
+npm run test:ui
+
+# Run unit tests with coverage
+npm run test:coverage
+
+# Run E2E tests (Playwright)
+npm run test:e2e
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run E2E tests in headed mode (see browser)
+npm run test:e2e:headed
+
+# Debug E2E tests
+npm run test:e2e:debug
+```
+
 ## 📋 Approach
 
 ### Architecture & Code Organization
@@ -47,6 +94,7 @@ npm run preview
 I structured the project with a focus on **separation of concerns** and **reusability**:
 
 #### Component Structure
+
 ```
 src/components/EnergyTimeline/
 ├── EnergyTimeline.tsx          # Main container component
@@ -60,6 +108,7 @@ src/components/EnergyTimeline/
 ```
 
 #### Hooks Structure
+
 ```
 src/hooks/
 ├── constants.ts                # Chart constants (width, height, margins)
@@ -76,6 +125,7 @@ src/hooks/
 ```
 
 #### Utils Structure
+
 ```
 src/utils/
 ├── energyColor.ts              # Energy color calculation
@@ -124,6 +174,7 @@ src/utils/
 ### Implementation Details
 
 #### Energy Curve Rendering
+
 - Uses D3.js `scaleTime` for x-axis (time) and `scaleLinear` for y-axis (energy level 0-1)
 - Implements `d3.line()` with `curveCatmullRom` for smooth curve interpolation
 - Data points are interpolated every 15 minutes for smoother visualization
@@ -131,11 +182,13 @@ src/utils/
 - Real-time indicator updates automatically every minute to show current position
 
 #### Color Coding
+
 - **High energy (≥ 0.6)**: `#256EFF` (Blue)
 - **Medium energy (≥ 0.3)**: `#DC8F69` (Orange)
 - **Low energy (< 0.3)**: `#B7148E` (Pink/Magenta)
 
 #### Interactive Features
+
 - **Hover Tooltip**: Shows current phase label and focus state when hovering over the curve
 - **Current Time Indicator**: Dashed white vertical line with dot showing real-time position
 - **Real-time Updates**: Current time indicator and insights update automatically every minute
@@ -143,6 +196,7 @@ src/utils/
 - **Responsive SVG**: Uses `viewBox` for proper scaling across screen sizes
 
 #### Layout
+
 - Modal-style container with sticky header
 - Scrollable content area with hidden scrollbar
 - Gradient background matching design specifications
@@ -197,6 +251,11 @@ src/utils/
 - **D3.js v7** - Data visualization and scales
 - **Tailwind CSS v4** - Styling (CSS-first configuration)
 - **Vite** - Build tool and dev server
+- **Vitest** - Unit testing framework
+- **Playwright** - End-to-end testing
+- **ESLint** - Code linting and quality
+- **Prettier** - Code formatting
+- **Testing Library** - React component testing utilities
 
 ## 📁 Project Structure
 
@@ -215,6 +274,11 @@ energy-timeline/
 │   │   │   └── YourSleep.tsx
 │   │   └── type.ts              # TypeScript type definitions
 │   ├── hooks/                   # Custom React hooks
+│   │   ├── __tests__/           # Hook unit tests
+│   │   │   ├── useRealTime.test.ts
+│   │   │   ├── useParsedData.test.ts
+│   │   │   ├── useChartScales.test.ts
+│   │   │   └── useEnergyInsights.test.ts
 │   │   ├── constants.ts
 │   │   ├── useParsedData.ts
 │   │   ├── useChartScales.ts
@@ -227,6 +291,12 @@ energy-timeline/
 │   │   ├── useEnergyInsights.ts
 │   │   └── useRealTime.ts
 │   ├── utils/                   # Utility functions
+│   │   ├── __tests__/           # Utility unit tests
+│   │   │   ├── energyColor.test.ts
+│   │   │   ├── focusState.test.ts
+│   │   │   ├── timeFormatting.test.ts
+│   │   │   ├── dataPointHelpers.test.ts
+│   │   │   └── highlightHelpers.test.ts
 │   │   ├── energyColor.ts
 │   │   ├── focusState.ts
 │   │   ├── timeFormatting.ts
@@ -238,15 +308,26 @@ energy-timeline/
 │   │   └── chartHighlights.ts
 │   ├── data/
 │   │   └── sampleData.ts        # Sample energy data
+│   ├── test/
+│   │   └── setup.ts             # Test setup file
 │   ├── App.tsx                  # Root component
 │   ├── main.tsx                 # Entry point
 │   └── index.css                # Global styles
+├── e2e/                         # End-to-end tests
+│   └── energy-timeline.spec.ts  # Playwright E2E tests
+├── .prettierrc.json             # Prettier configuration
+├── .prettierignore              # Prettier ignore patterns
+├── eslint.config.js             # ESLint configuration
+├── playwright.config.ts         # Playwright configuration
+├── vitest.config.ts             # Vitest configuration
 ├── package.json
 ├── vite.config.ts
 └── README.md
 ```
 
 ## ✨ Features
+
+### Core Functionality
 
 - ✅ 24-hour energy timeline visualization
 - ✅ Smooth, color-coded energy curve with Catmull-Rom interpolation
@@ -261,6 +342,14 @@ energy-timeline/
 - ✅ Modal-style layout with sticky header
 - ✅ Scrollable content with hidden scrollbar
 - ✅ Responsive design
+
+### Code Quality & Testing
+
+- ✅ Comprehensive unit test coverage (55 tests with Vitest)
+- ✅ End-to-end testing (33 tests with Playwright across 3 browsers)
+- ✅ ESLint configuration for code quality
+- ✅ Prettier for consistent code formatting
+- ✅ TypeScript for type safety
 - ✅ Clean, maintainable code structure with separated concerns
 
 ## 🎨 Design Notes
@@ -270,6 +359,114 @@ energy-timeline/
 - Subtle background segments for day parts
 - Clean typography and spacing
 - Hidden scrollbar for cleaner appearance
+
+## 🧪 Testing
+
+### Unit Tests (Vitest)
+
+Unit tests are located in `src/` with `__tests__` folders. Run all unit tests:
+
+```bash
+npm test
+```
+
+**Test Coverage:**
+
+- ✅ Utility functions (34 tests) - Pure functions for calculations
+- ✅ Custom hooks (21 tests) - React hooks for data processing and state management
+- ✅ Total: 55 unit tests
+
+**Test Structure:**
+
+```
+src/
+├── hooks/__tests__/          # Hook unit tests
+│   ├── useRealTime.test.ts
+│   ├── useParsedData.test.ts
+│   ├── useChartScales.test.ts
+│   └── useEnergyInsights.test.ts
+└── utils/__tests__/          # Utility function tests
+    ├── energyColor.test.ts
+    ├── focusState.test.ts
+    ├── timeFormatting.test.ts
+    ├── dataPointHelpers.test.ts
+    └── highlightHelpers.test.ts
+```
+
+### E2E Tests (Playwright)
+
+End-to-end tests verify the full user experience across browsers. Run E2E tests:
+
+```bash
+npm run test:e2e
+```
+
+**Test Coverage:**
+
+- ✅ Page loading and structure
+- ✅ Header elements and navigation
+- ✅ Chart rendering and interactions
+- ✅ Energy insights display
+- ✅ Sleep information cards
+- ✅ Layout and responsiveness
+- ✅ Cross-browser testing (Chrome, Firefox, Safari)
+- ✅ Total: 11 test suites (33 tests across 3 browsers)
+
+**Test Structure:**
+
+```
+e2e/
+└── energy-timeline.spec.ts   # E2E test suite
+```
+
+## 📐 Code Quality
+
+### ESLint
+
+ESLint is configured for TypeScript and React with recommended rules:
+
+```bash
+# Check for linting errors
+npm run lint
+
+# Auto-fix fixable errors
+npm run lint:fix
+```
+
+**Configuration:**
+
+- ESLint 9 flat config format
+- TypeScript support via `typescript-eslint`
+- React hooks rules
+- React refresh plugin for Vite
+- Prettier integration (no conflicts)
+
+### Prettier
+
+Prettier ensures consistent code formatting across the project:
+
+```bash
+# Format all files
+npm run format
+
+# Check formatting (CI/CD)
+npm run format:check
+```
+
+**Configuration (`.prettierrc.json`):**
+
+- No semicolons
+- Single quotes
+- 2-space indentation
+- 100 character line width
+- ES5 trailing commas
+- LF line endings
+
+**Files ignored (`.prettierignore`):**
+
+- Build outputs (`dist/`, `coverage/`)
+- Dependencies (`node_modules/`)
+- Test artifacts (`playwright-report/`, `test-results/`)
 
 ## 📝 Notes
 
@@ -281,13 +478,71 @@ energy-timeline/
 - Dynamic messages provide contextual insights based on current energy state
 - Code is organized with hooks and utilities in separate folders for better maintainability
 - Font family: Segoe UI Variable Display (applied globally)
+- Code formatting is enforced with Prettier
+- Code quality is checked with ESLint
+- Comprehensive test coverage with Vitest (unit) and Playwright (E2E)
+
+## 🔄 Development Workflow
+
+### Pre-commit Checklist
+
+Before committing code, ensure:
+
+```bash
+# 1. Format code
+npm run format
+
+# 2. Check linting
+npm run lint
+
+# 3. Fix linting issues (if any)
+npm run lint:fix
+
+# 4. Run unit tests
+npm test
+
+# 5. Run E2E tests (optional, before major releases)
+npm run test:e2e
+```
+
+### CI/CD Integration
+
+The project is ready for CI/CD with the following scripts:
+
+- `npm run lint` - Check code quality
+- `npm run format:check` - Verify formatting
+- `npm test` - Run unit tests
+- `npm run test:coverage` - Generate coverage reports
+- `npm run test:e2e` - Run E2E tests
+- `npm run build` - Build for production
+
+### Testing Strategy
+
+1. **Unit Tests (Vitest)**: Fast, isolated tests for pure functions and hooks
+   - Located in `__tests__` folders
+   - Run automatically on file changes in watch mode
+   - Coverage reports available
+
+2. **E2E Tests (Playwright)**: Full user journey tests
+   - Cross-browser testing (Chrome, Firefox, Safari)
+   - Visual regression testing
+   - Interaction and accessibility checks
+
+3. **Code Quality**: Automated checks
+   - ESLint catches code quality issues
+   - Prettier ensures consistent formatting
+   - TypeScript provides compile-time type checking
 
 ## 🔮 Future Enhancements
 
 Potential improvements for production:
+
 - Add animation transitions for data updates
 - Implement zoom/pan functionality
 - Add data export capabilities
 - Support for multiple day views
 - Accessibility improvements (ARIA labels, keyboard navigation)
 - Performance optimizations for large datasets
+- Add Husky for git hooks (pre-commit linting/formatting)
+- Integrate coverage reporting in CI/CD
+- Add visual regression testing with Playwright
