@@ -15,7 +15,7 @@ export const HighlightsLabels = ({
 }: HighlightsLabelsProps) => {
   return (
     <div
-      className="absolute top-0 right-0 pointer-events-none"
+      className="absolute top-0 right-0 pointer-events-none hidden lg:block"
       style={{
         width: `${highlightsOffset + 140}px`,
         height: `${chartHeight - margin.bottom - margin.top}px`,

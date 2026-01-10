@@ -103,7 +103,6 @@ src/components/EnergyTimeline/
 ├── ChartTooltip.tsx            # Hover tooltip component
 ├── RecommendationText.tsx      # Recommendation text component
 ├── SleepInfoCards.tsx          # Sleep information cards
-├── SleepDebt.tsx               # Sleep debt visualization
 └── YourSleep.tsx               # Sleep graph component
 ```
 
@@ -121,7 +120,8 @@ src/hooks/
 ├── useBackgroundSegments.ts   # Background segment generation
 ├── useHover.ts                 # Mouse interaction handling
 ├── useEnergyInsights.ts        # Energy insights logic
-└── useRealTime.ts              # Real-time tracking hook
+├── useRealTime.ts              # Real-time tracking hook
+└── useResponsiveChartWidth.ts  # Responsive chart width calculation
 ```
 
 #### Utils Structure
@@ -145,7 +145,7 @@ src/utils/
    - `HighlightsLabels` - Handles highlight labels positioning
    - `ChartTooltip` - Manages hover tooltip display
    - `RecommendationText` & `SleepInfoCards` - Separate content sections
-   - `SleepDebt` & `YourSleep` - Sleep tracking visualizations
+   - `YourSleep` - Sleep tracking visualization
 
 2. **Custom Hooks Pattern**: Chart logic is separated into individual hook files
    - Each hook in its own file within `src/hooks/` folder
@@ -155,6 +155,7 @@ src/utils/
    - `useHover` - Mouse interaction handling
    - `useEnergyInsights` - Energy insights and phase detection
    - `useRealTime` - Real-time tracking with automatic updates
+   - `useResponsiveChartWidth` - Responsive chart width calculation for mobile/desktop
    - Each hook has a single responsibility and is easily testable
 
 3. **Utility Functions**: Pure functions organized by concern
@@ -180,6 +181,8 @@ src/utils/
 - Data points are interpolated every 15 minutes for smoother visualization
 - Curve is split into colored segments based on energy thresholds
 - Real-time indicator updates automatically every minute to show current position
+- Responsive width calculation: uses viewport width on mobile, fixed width on desktop
+- Dynamic margins adjusted based on screen size for optimal mobile display
 
 #### Color Coding
 
@@ -270,7 +273,6 @@ energy-timeline/
 │   │   │   ├── ChartTooltip.tsx
 │   │   │   ├── RecommendationText.tsx
 │   │   │   ├── SleepInfoCards.tsx
-│   │   │   ├── SleepDebt.tsx
 │   │   │   └── YourSleep.tsx
 │   │   └── type.ts              # TypeScript type definitions
 │   ├── hooks/                   # Custom React hooks
@@ -289,7 +291,8 @@ energy-timeline/
 │   │   ├── useBackgroundSegments.ts
 │   │   ├── useHover.ts
 │   │   ├── useEnergyInsights.ts
-│   │   └── useRealTime.ts
+│   │   ├── useRealTime.ts
+│   │   └── useResponsiveChartWidth.ts
 │   ├── utils/                   # Utility functions
 │   │   ├── __tests__/           # Utility unit tests
 │   │   │   ├── energyColor.test.ts
@@ -337,11 +340,11 @@ energy-timeline/
 - ✅ Current time indicator with dashed line and dot
 - ✅ Energy phase highlights with labels
 - ✅ Time labels with 12-hour format (displayed every 4 hours)
-- ✅ Background day segments
-- ✅ Sleep debt and sleep graph visualizations
+- ✅ Background day segments with subtle colors for different parts of the day
+- ✅ Sleep information cards
 - ✅ Modal-style layout with sticky header
 - ✅ Scrollable content with hidden scrollbar
-- ✅ Responsive design
+- ✅ Fully responsive design (fits mobile screens without horizontal scrolling)
 
 ### Code Quality & Testing
 

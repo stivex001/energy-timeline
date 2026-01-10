@@ -26,14 +26,14 @@ describe('useChartScales', () => {
   ]
 
   it('should return xScale and yScale', () => {
-    const { result } = renderHook(() => useChartScales(mockParsedData))
+    const { result } = renderHook(() => useChartScales(mockParsedData, 800))
 
     expect(result.current.xScale).toBeDefined()
     expect(result.current.yScale).toBeDefined()
   })
 
   it('should create xScale with correct domain from data', () => {
-    const { result } = renderHook(() => useChartScales(mockParsedData))
+    const { result } = renderHook(() => useChartScales(mockParsedData, 800))
 
     const domain = result.current.xScale.domain()
     expect(domain[0].getTime()).toBe(new Date('2024-01-01T10:00:00Z').getTime())
@@ -41,7 +41,7 @@ describe('useChartScales', () => {
   })
 
   it('should create yScale with domain [0, 1]', () => {
-    const { result } = renderHook(() => useChartScales(mockParsedData))
+    const { result } = renderHook(() => useChartScales(mockParsedData, 800))
 
     const domain = result.current.yScale.domain()
     expect(domain[0]).toBe(0)
@@ -49,7 +49,7 @@ describe('useChartScales', () => {
   })
 
   it('should map dates to x positions correctly', () => {
-    const { result } = renderHook(() => useChartScales(mockParsedData))
+    const { result } = renderHook(() => useChartScales(mockParsedData, 800))
 
     const x1 = result.current.xScale(new Date('2024-01-01T10:00:00Z'))
     const x2 = result.current.xScale(new Date('2024-01-01T14:00:00Z'))
@@ -58,7 +58,7 @@ describe('useChartScales', () => {
   })
 
   it('should map energy levels to y positions correctly', () => {
-    const { result } = renderHook(() => useChartScales(mockParsedData))
+    const { result } = renderHook(() => useChartScales(mockParsedData, 800))
 
     const y1 = result.current.yScale(0)
     const y2 = result.current.yScale(1)
@@ -69,7 +69,7 @@ describe('useChartScales', () => {
   })
 
   it('should handle empty data array', () => {
-    const { result } = renderHook(() => useChartScales([]))
+    const { result } = renderHook(() => useChartScales([], 800))
 
     expect(result.current.xScale).toBeDefined()
     expect(result.current.yScale).toBeDefined()

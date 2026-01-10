@@ -8,7 +8,8 @@ import { useHighlights } from '../../hooks/useHighlights'
 import { useCurrentTimePosition } from '../../hooks/useCurrentTimePosition'
 import { useBackgroundSegments } from '../../hooks/useBackgroundSegments'
 import { useHover } from '../../hooks/useHover'
-import { CHART_WIDTH, CHART_HEIGHT, MARGIN, HIGHLIGHTS_OFFSET } from '../../hooks/constants'
+import { useResponsiveChartWidth } from '../../hooks/useResponsiveChartWidth'
+import { CHART_HEIGHT, MARGIN, HIGHLIGHTS_OFFSET } from '../../hooks/constants'
 import { HighlightsLabels } from './HighlightsLabels'
 import { ChartTooltip } from './ChartTooltip'
 import { useRealTime } from '../../hooks/useRealTime'
@@ -16,7 +17,7 @@ import { useRealTime } from '../../hooks/useRealTime'
 export type EnergyChartProps = {
   data: EnergyPoint[]
   highlights: EnergyHighlight[]
-  currentTime?: string // Optional, will use real-time if not provided
+  currentTime?: string 
 }
 
 export const EnergyChart = (props: EnergyChartProps) => {
@@ -27,8 +28,11 @@ export const EnergyChart = (props: EnergyChartProps) => {
 
   const parsedData = useParsedData(data)
 
-  // Get scales
-  const { xScale, yScale } = useChartScales(parsedData)
+  // Get responsive chart width
+  const { chartWidth, containerRef: widthContainerRef } = useResponsiveChartWidth()
+
+  // Get scales with responsive width
+  const { xScale, yScale } = useChartScales(parsedData, chartWidth)
 
   // Get chart elements
   const segments = useChartSegments(parsedData, xScale, yScale)
@@ -44,127 +48,136 @@ export const EnergyChart = (props: EnergyChartProps) => {
     yScale
   )
 
+  // Combine refs: use containerRef from useHover, also update widthContainerRef for responsive calculation
+  const chartContainerRef = (node: HTMLDivElement | null) => {
+    ;(containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+    ;(widthContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+  }
+
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-x-auto">
-      <svg
-        ref={svgRef}
-        width={CHART_WIDTH}
-        height={CHART_HEIGHT}
-        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-        preserveAspectRatio="xMidYMid meet"
-        className="w-full h-auto"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        {/* Background segments */}
-        <g>
-          {backgroundSegments.map((segment, idx) => (
-            <rect
+    <div ref={chartContainerRef} className="relative w-full max-w-full overflow-hidden">
+      <div className="relative w-full max-w-full">
+        <svg
+          ref={svgRef}
+          width={chartWidth}
+          height={CHART_HEIGHT}
+          viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
+          preserveAspectRatio="xMidYMid meet"
+          className="block h-auto w-full max-w-full"
+          style={{ maxWidth: '100%', height: 'auto' }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          {/* Background segments */}
+          <g>
+            {backgroundSegments.map((segment, idx) => (
+              <rect
+                key={idx}
+                x={segment.x1}
+                y={MARGIN.top}
+                width={segment.x2 - segment.x1}
+                height={CHART_HEIGHT - MARGIN.top - MARGIN.bottom}
+                fill={segment.color}
+              />
+            ))}
+          </g>
+
+          {/* Time labels */}
+          <g className="time-labels">
+            {timeLabels.map((label, idx) => (
+              <g key={idx}>
+                <line
+                  x1={label.x}
+                  y1={CHART_HEIGHT - MARGIN.bottom}
+                  x2={label.x}
+                  y2={CHART_HEIGHT - MARGIN.bottom + 5}
+                  stroke="#666"
+                  strokeWidth={1}
+                />
+                <text
+                  x={label.x}
+                  y={CHART_HEIGHT - MARGIN.bottom + 20}
+                  fill="#888"
+                  fontSize="11"
+                  textAnchor="middle"
+                  className="font-mono"
+                >
+                  {label.label}
+                </text>
+              </g>
+            ))}
+          </g>
+
+          {/* Energy curve segments */}
+          {segments.map((segment, idx) => (
+            <path
               key={idx}
-              x={segment.x1}
-              y={MARGIN.top}
-              width={segment.x2 - segment.x1}
-              height={CHART_HEIGHT - MARGIN.top - MARGIN.bottom}
-              fill={segment.color}
+              d={segment.path}
+              fill="none"
+              stroke={segment.color}
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           ))}
-        </g>
 
-        {/* Time labels */}
-        <g className="time-labels">
-          {timeLabels.map((label, idx) => (
-            <g key={idx}>
-              <line
-                x1={label.x}
-                y1={CHART_HEIGHT - MARGIN.bottom}
-                x2={label.x}
-                y2={CHART_HEIGHT - MARGIN.bottom + 5}
-                stroke="#666"
-                strokeWidth={1}
-              />
-              <text
-                x={label.x}
-                y={CHART_HEIGHT - MARGIN.bottom + 20}
-                fill="#888"
-                fontSize="11"
-                textAnchor="middle"
-                className="font-mono"
-              >
-                {label.label}
-              </text>
-            </g>
-          ))}
-        </g>
-
-        {/* Energy curve segments */}
-        {segments.map((segment, idx) => (
-          <path
-            key={idx}
-            d={segment.path}
-            fill="none"
-            stroke={segment.color}
-            strokeWidth={5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        ))}
-
-        {/* Current time indicator */}
-        <g className="current-time-indicator">
-          <line
-            x1={currentTimePosition.x}
-            y1={MARGIN.top}
-            x2={currentTimePosition.x}
-            y2={CHART_HEIGHT - MARGIN.bottom}
-            stroke="white"
-            strokeWidth={0.3}
-            strokeDasharray="2,2"
-            opacity={0.5}
-          />
-          <circle
-            cx={currentTimePosition.x}
-            cy={currentTimePosition.y}
-            r={4}
-            fill="white"
-            stroke="#0b0f1a"
-            strokeWidth={2}
-          />
-        </g>
-
-        {/* Hover indicator */}
-        {hoveredPoint && (
-          <g className="hover-indicator">
+          {/* Current time indicator */}
+          <g className="current-time-indicator">
+            <line
+              x1={currentTimePosition.x}
+              y1={MARGIN.top}
+              x2={currentTimePosition.x}
+              y2={CHART_HEIGHT - MARGIN.bottom}
+              stroke="white"
+              strokeWidth={0.3}
+              strokeDasharray="2,2"
+              opacity={0.5}
+            />
             <circle
-              cx={hoveredPoint.svgX}
-              cy={hoveredPoint.svgY}
+              cx={currentTimePosition.x}
+              cy={currentTimePosition.y}
               r={4}
               fill="white"
               stroke="#0b0f1a"
               strokeWidth={2}
             />
-            <line
-              x1={hoveredPoint.svgX}
-              y1={MARGIN.top}
-              x2={hoveredPoint.svgX}
-              y2={CHART_HEIGHT - MARGIN.bottom}
-              stroke="rgba(255, 255, 255, 0.3)"
-              strokeWidth={1}
-              strokeDasharray="2,2"
-            />
           </g>
+
+          {/* Hover indicator */}
+          {hoveredPoint && (
+            <g className="hover-indicator">
+              <circle
+                cx={hoveredPoint.svgX}
+                cy={hoveredPoint.svgY}
+                r={4}
+                fill="white"
+                stroke="#0b0f1a"
+                strokeWidth={2}
+              />
+              <line
+                x1={hoveredPoint.svgX}
+                y1={MARGIN.top}
+                x2={hoveredPoint.svgX}
+                y2={CHART_HEIGHT - MARGIN.bottom}
+                stroke="rgba(255, 255, 255, 0.3)"
+                strokeWidth={1}
+                strokeDasharray="2,2"
+              />
+            </g>
+          )}
+        </svg>
+
+        <HighlightsLabels
+          highlights={highlightsWithPositions}
+          chartHeight={CHART_HEIGHT}
+          margin={MARGIN}
+          highlightsOffset={HIGHLIGHTS_OFFSET}
+        />
+
+        {hoveredPoint && (
+          <ChartTooltip hoveredPoint={hoveredPoint} highlights={highlightsWithPositions} />
         )}
-      </svg>
-
-      <HighlightsLabels
-        highlights={highlightsWithPositions}
-        chartHeight={CHART_HEIGHT}
-        margin={MARGIN}
-        highlightsOffset={HIGHLIGHTS_OFFSET}
-      />
-
-      {hoveredPoint && (
-        <ChartTooltip hoveredPoint={hoveredPoint} highlights={highlightsWithPositions} />
-      )}
+      </div>
     </div>
   )
 }
